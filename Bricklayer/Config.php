@@ -13,15 +13,15 @@ $gConfig = [
     'trace' => true,
     'db' => [
         // required
-        'database_type' => 'pgsql',
-        'database_name' => 'IOT',
+        'database_type' => 'mysql',
+        'database_name' => 'teamup',
         'server' => 'localhost',
-        'username' => 'iot_server',
-        'password' => 'iot_server',
+        'username' => 'teamup',
+        'password' => '1234bacd',
 
         // optional
         'charset' => 'utf8',
-        'port' => 5432,
+        'port' => 3306,
 
         // [optional] Table prefix
         //'prefix' => 'iot_',
