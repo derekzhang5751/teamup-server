@@ -17,10 +17,10 @@ $gConfig = [
         'database_name' => 'teamup',
         'server' => 'localhost',
         'username' => 'teamup',
-        'password' => '1234bacd',
+        'password' => 'Abcd1234!',
 
         // optional
-        'socket' => '/tmp/mysql.sock',
+        'socket' => '/var/lib/mysql/mysql.sock',
         'charset' => 'utf8',
         'port' => 3306,
 
@@ -34,10 +34,10 @@ $gConfig = [
     ],
     'log' => [
         'logging' => true,
-        'basepath' => 'C:/workspace/logs/'
+        'basepath' => '/usr/local/apache2/htdocs/log/'
     ],
     'upload' => [
-        'uploadpath' => 'C:/workspace/upload/',
+        'uploadpath' => '/usr/local/apache2/htdocs/upload/',
         'maxsize' => 1048576
     ]
 ];
