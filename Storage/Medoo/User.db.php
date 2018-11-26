@@ -1,7 +1,7 @@
 <?php
 /**
  * User: Derek
- * Date: 2018.10
+ * Date: 2018.11
  */
 
 function db_check_user_login($userName, $password)
@@ -16,20 +16,6 @@ function db_check_user_login($userName, $password)
     return $user;
 }
 
-//////////////////////////////////////////////////////////
-function db_check_admin_login($userName, $password)
-{
-    $user = $GLOBALS['db']->get('tu_user',
-        ['id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc', 'dev_uid'],
-        [
-            'username' => $userName,
-            'password' => $password,
-            'level[>]' => 4
-        ]
-    );
-    return $user;
-}
-
 function db_get_user_info($userId)
 {
     $user = $GLOBALS['db']->get('tu_user',
@@ -39,6 +25,20 @@ function db_get_user_info($userId)
         ],
         [
             'id' => $userId
+        ]
+    );
+    return $user;
+}
+
+//////////////////////////////////////////////////////////
+function db_check_admin_login($userName, $password)
+{
+    $user = $GLOBALS['db']->get('tu_user',
+        ['id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc', 'dev_uid'],
+        [
+            'username' => $userName,
+            'password' => $password,
+            'level[>]' => 4
         ]
     );
     return $user;
@@ -87,25 +87,26 @@ function db_update_user_device_info($mobile, $data)
     return $data->rowCount();
 }
 
-function db_check_user_building_linked($userId, $buildingId)
+function db_check_user_team_linked($userId, $teamId)
 {
-    $link = $GLOBALS['db']->get('iot_link_user_building',
-        ['id', 'userid', 'building'],
+    $link = $GLOBALS['db']->get('tu_link_user_team',
+        ['id', 'user_id', 'team_id', 'status'],
         [
-            'userid' => $userId,
-            'building' => $buildingId
+            'user_id' => $userId,
+            'team_id' => $teamId
         ]
     );
     return $link;
 }
 
-function db_insert_user_building_link($userId, $buildingId)
+function db_insert_user_team_link($userId, $teamId, $status)
 {
     $data = array(
-        'userid'   => trim($userId),
-        'building' => trim($buildingId)
+        'user_id' => $userId,
+        'team_id' => $teamId,
+        'status'  => $status
     );
-    $stat = $GLOBALS['db']->insert('iot_link_user_building', $data);
+    $stat = $GLOBALS['db']->insert('tu_link_user_team', $data);
     if ($stat->rowCount() == 1) {
         return $GLOBALS['db']->id();
     } else {
@@ -113,12 +114,12 @@ function db_insert_user_building_link($userId, $buildingId)
     }
 }
 
-function db_delete_user_building_link($userId, $buildingId)
+function db_delete_user_team_link($userId, $teamId)
 {
-    $stat = $GLOBALS['db']->delete('iot_link_user_building',
+    $stat = $GLOBALS['db']->delete('tu_link_user_team',
         [
-            'userid' => $userId,
-            'building' => $buildingId
+            'user_id' => $userId,
+            'team_id' => $teamId
         ]
     );
     if ($stat->rowCount() > 0) {
@@ -128,39 +129,17 @@ function db_delete_user_building_link($userId, $buildingId)
     }
 }
 
-function db_get_user_list($buildingId)
-{
-    if ($buildingId == 0) {
-        $buildings = $GLOBALS['db']->select('tu_user',
-            [
-                'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc',
-                'dev_uid', 'token', 'dev_type', 'dev_model'
-            ],
-            [
-                'ORDER' => ['id' => 'DESC']
-            ]
-        );
-    } else {
-        $sql = "SELECT \"id\",username,\"level\",first_name,last_name,email,mobile,is_active,reg_time,\"desc\",dev_uid,token,dev_type,dev_model FROM iot_user";
-        $sql = $sql . " WHERE \"id\" IN (SELECT userid FROM iot_link_user_building WHERE building=:building) ORDER BY \"id\" DESC";
-        $buildings = $GLOBALS['db']->query($sql, [
-            ":building" => $buildingId
-        ])->fetchAll();
-    }
-    return $buildings;
-}
-
 function db_insert_user($user)
 {
     $data = array(
         'username'   => trim($user['username']),
         'password'   => '1234',
-        'level'      => trim($user['level']),
+        'level'      => $user['level'],
         'first_name' => trim($user['first_name']),
         'last_name'  => trim($user['last_name']),
         'email'      => trim($user['email']),
         'mobile'     => trim($user['mobile']),
-        'is_active'  => trim($user['is_active']),
+        'is_active'  => $user['is_active'],
         'reg_time'   => trim($user['reg_time']),
         'desc'       => trim($user['desc'])
     );
@@ -179,12 +158,12 @@ function db_update_user($user)
     }
     $cols = array(
         'username'   => trim($user['username']),
-        'level'      => trim($user['level']),
+        'level'      => $user['level'],
         'first_name' => trim($user['first_name']),
         'last_name'  => trim($user['last_name']),
         'email'      => trim($user['email']),
         'mobile'     => trim($user['mobile']),
-        'is_active'  => trim($user['is_active']),
+        'is_active'  => $user['is_active'],
         'desc'       => trim($user['desc'])
     );
     $data = $GLOBALS['db']->update('tu_user', $cols,
@@ -224,13 +203,13 @@ function db_get_user_by_uuid($uuid)
     return $user;
 }
 
-function db_select_user_link_building($userId)
+function db_select_user_link_team($userId)
 {
-    $link = $GLOBALS['db']->select('iot_link_user_building',
-        ['id', 'userid', 'building'],
+    $links = $GLOBALS['db']->select('tu_link_user_team',
+        ['id', 'user_id', 'team_id', 'status'],
         [
-            'userid' => $userId
+            'user_id' => $userId
         ]
     );
-    return $link;
+    return $links;
 }
