@@ -4,7 +4,7 @@
  * Date: 2018.09
  */
 
-class IotBase extends \Bricker\RequestLifeCircle {
+class TeamupBase extends \Bricker\RequestLifeCircle {
 
     public function __construct() {
     }

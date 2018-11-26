@@ -124,7 +124,7 @@ if (DEVICE_WEB == $DeviceType) {
 /*
  * CORS
  */
-header("Access-Control-Allow-Origin: *");
+//header("Access-Control-Allow-Origin: *");
 
 /*
  * run

@@ -6,19 +6,20 @@
 
 function db_check_user_login($userName, $password)
 {
-    $user = $GLOBALS['db']->get('iot_user',
+    $user = $GLOBALS['db']->get('tu_user',
         ['id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc'],
         [
-            'mobile' => $userName,
+            'email' => $userName,
             'password' => $password
         ]
     );
     return $user;
 }
 
+//////////////////////////////////////////////////////////
 function db_check_admin_login($userName, $password)
 {
-    $user = $GLOBALS['db']->get('iot_user',
+    $user = $GLOBALS['db']->get('tu_user',
         ['id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc', 'dev_uid'],
         [
             'username' => $userName,
@@ -31,7 +32,7 @@ function db_check_admin_login($userName, $password)
 
 function db_get_user_info($userId)
 {
-    $user = $GLOBALS['db']->get('iot_user',
+    $user = $GLOBALS['db']->get('tu_user',
         [
             'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc',
             'dev_uid', 'token', 'dev_type', 'dev_model', 'last_time'
@@ -46,7 +47,7 @@ function db_get_user_info($userId)
 function db_set_user_active_time($mobile, $code)
 {
     $now = date('Y-m-d H:i:s');
-    $data = $GLOBALS['db']->update('iot_user',
+    $data = $GLOBALS['db']->update('tu_user',
         [
             'last_time' => $now,
             'password' => $code
@@ -60,7 +61,7 @@ function db_set_user_active_time($mobile, $code)
 
 function db_get_user_active_time($mobile)
 {
-    $user = $GLOBALS['db']->get('iot_user',
+    $user = $GLOBALS['db']->get('tu_user',
         ['id', 'username', 'last_time'],
         [
             'mobile' => $mobile
@@ -72,7 +73,7 @@ function db_get_user_active_time($mobile)
 function db_update_user_device_info($mobile, $data)
 {
     $now = date('Y-m-d H:i:s');
-    $data = $GLOBALS['db']->update('iot_user',
+    $data = $GLOBALS['db']->update('tu_user',
         [
             'dev_uid' => $data['dev_uid'],
             'token' => $data['token'],
@@ -130,7 +131,7 @@ function db_delete_user_building_link($userId, $buildingId)
 function db_get_user_list($buildingId)
 {
     if ($buildingId == 0) {
-        $buildings = $GLOBALS['db']->select('iot_user',
+        $buildings = $GLOBALS['db']->select('tu_user',
             [
                 'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc',
                 'dev_uid', 'token', 'dev_type', 'dev_model'
@@ -163,7 +164,7 @@ function db_insert_user($user)
         'reg_time'   => trim($user['reg_time']),
         'desc'       => trim($user['desc'])
     );
-    $stat = $GLOBALS['db']->insert('iot_user', $data);
+    $stat = $GLOBALS['db']->insert('tu_user', $data);
     if ($stat->rowCount() == 1) {
         return $GLOBALS['db']->id();
     } else {
@@ -186,7 +187,7 @@ function db_update_user($user)
         'is_active'  => trim($user['is_active']),
         'desc'       => trim($user['desc'])
     );
-    $data = $GLOBALS['db']->update('iot_user', $cols,
+    $data = $GLOBALS['db']->update('tu_user', $cols,
         [
             'id' => $user['id']
         ]
@@ -197,7 +198,7 @@ function db_update_user($user)
 function db_update_user_dev_uid($username, $deviceUid)
 {
     $now = date('Y-m-d H:i:s');
-    $data = $GLOBALS['db']->update('iot_user',
+    $data = $GLOBALS['db']->update('tu_user',
         [
             'dev_uid' => $deviceUid,
             'last_time' => $now
@@ -211,7 +212,7 @@ function db_update_user_dev_uid($username, $deviceUid)
 
 function db_get_user_by_uuid($uuid)
 {
-    $user = $GLOBALS['db']->get('iot_user',
+    $user = $GLOBALS['db']->get('tu_user',
         [
             'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc',
             'dev_uid', 'token', 'dev_type', 'dev_model', 'last_time'

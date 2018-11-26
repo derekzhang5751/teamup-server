@@ -20,6 +20,7 @@ $gConfig = [
         'password' => '1234bacd',
 
         // optional
+        'socket' => '/tmp/mysql.sock',
         'charset' => 'utf8',
         'port' => 3306,
 
