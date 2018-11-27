@@ -8,10 +8,27 @@
 function db_select_teams($conditions)
 {
     $buildings = $GLOBALS['db']->select('tu_team',
-        ['id', 'author', 'category', 'time_begin', 'time_end', 'need_review', 'dp_self', 'dp_other', 'create_time', 'status', 'people', 'title', 'location', 'desc'],
+        [
+            'id', 'author', 'category', 'time_begin', 'time_end', 'need_review', 'dp_self',
+            'dp_other', 'create_time', 'status', 'people', 'title', 'location', 'desc'
+        ],
         $conditions
     );
     return $buildings;
+}
+
+function db_get_team_info($teamId)
+{
+    $team = $GLOBALS['db']->get('tu_team',
+        [
+            'id', 'author', 'category', 'time_begin', 'time_end', 'need_review', 'dp_self',
+            'dp_other', 'create_time', 'status', 'people', 'title', 'location', 'desc'
+        ],
+        [
+            'id' => $teamId
+        ]
+    );
+    return $team;
 }
 
 function db_insert_team($team)
@@ -64,4 +81,49 @@ function db_get_floors_of_building($buildingId, $desc)
     ])->fetchAll();
     //var_dump( $GLOBALS['db']->error() );
     return $floors;
+}
+
+function db_exist_link_user_team($userId, $teamId)
+{
+    $exist = $GLOBALS['db']->has('tu_link_user_team',
+        [
+            'user_id' => $userId,
+            'team_id' => $teamId
+        ]
+    );
+    return $exist;
+}
+
+function db_insert_link_user_team($userId, $teamId, $status)
+{
+    $data = array(
+        'user_id'   => $userId,
+        'team_id'   => $teamId,
+        'status'    => $status
+    );
+    $stat = $GLOBALS['db']->insert('tu_link_user_team', $data);
+    if ($stat->rowCount() == 1) {
+        return $GLOBALS['db']->id();
+    } else {
+        //exit (var_dump( $GLOBALS['db']->error() ));
+        return false;
+    }
+}
+
+function db_update_link_user_team($userId, $teamId, $status)
+{
+    $data = array(
+        'status'    => $status
+    );
+    $condition = array(
+        'user_id'   => $userId,
+        'team_id'   => $teamId
+    );
+    $stat = $GLOBALS['db']->update('tu_link_user_team', $data, $condition);
+    if ($stat->rowCount() > 0) {
+        return true;
+    } else {
+        //exit (var_dump( $GLOBALS['db']->error() ));
+        return false;
+    }
 }

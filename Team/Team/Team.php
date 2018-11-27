@@ -25,8 +25,14 @@ class Team extends TeamupBase {
         $this->return['data']['action'] = $this->action;
         if ($this->action == 'team_list') {
             $this->processGetTeamList();
+        } else if ($this->action == 'search_team') {
+            $this->processSearchTeams();
         } else if ($this->action == 'create_team') {
             $this->processCreateTeam();
+        } else if ($this->action == 'apply_team') {
+            $this->processApplyTeam();
+        } else if ($this->action == 'subscript_team') {
+            $this->processSubscriptTeam();
         }
         return true;
     }
@@ -49,11 +55,123 @@ class Team extends TeamupBase {
             $id = db_insert_team($team);
             if ($id) {
                 $this->return['success'] = true;
-                $this->return['data'] = $entityBody;
             } else {
                 $this->return['success'] = false;
                 $this->return['msg'] = 'Create the team error!';
                 $this->return['data'] = $entityBody;
+            }
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = $entityBody;
+        }
+    }
+
+    private function processSearchTeams() {
+        $entityBody = file_get_contents('php://input');
+        $cond = json_decode($entityBody, true);
+        if ($cond) {
+            $condition = [];
+            if ($cond['user_id']) {
+                $condition['author'] = $cond['user_id'];
+            }
+            if ($cond['status']) {
+                $condition['status'] = $cond['status'];
+            } else {
+                $condition['status[>=]'] = 0;
+            }
+            if ($cond['category']) {
+                $condition['category'] = $cond['category'];
+            }
+            $teams = db_select_teams($condition);
+            if ($teams) {
+                $this->return['success'] = true;
+                $this->return['data'] = $teams;
+            } else {
+                $this->return['success'] = true;
+                $this->return['data'] = [];
+            }
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = $entityBody;
+        }
+    }
+
+    private function processApplyTeam() {
+        $entityBody = file_get_contents('php://input');
+        $apply = json_decode($entityBody, true);
+        if ($apply) {
+            $user = db_get_user_info($apply['user_id']);
+            if (!$user) {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['NO_USER'];
+                return;
+            }
+            $team = db_get_team_info($apply['team_id']);
+            if (!$team) {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['NO_TEAM'];
+                return;
+            }
+
+            $status = LINK_SUBSCRIPT;
+            if ($team['need_review'] == 1) {
+                $status = LINK_APPLY;
+            } else {
+                $status = LINK_MEMBER;
+            }
+
+            if (db_exist_link_user_team($user['id'], $team['id'])) {
+                $success = db_update_link_user_team($user['id'], $team['id'], $status);
+            } else {
+                $success = db_insert_link_user_team($user['id'], $team['id'], $status);
+            }
+
+            if ($success) {
+                $this->return['success'] = true;
+            } else {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['APPLY_ERROR'];
+            }
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = $entityBody;
+        }
+    }
+
+    private function processSubscriptTeam() {
+        $entityBody = file_get_contents('php://input');
+        $apply = json_decode($entityBody, true);
+        if ($apply) {
+            $user = db_get_user_info($apply['user_id']);
+            if (!$user) {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['NO_USER'];
+                return;
+            }
+            $team = db_get_team_info($apply['team_id']);
+            if (!$team) {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['NO_TEAM'];
+                return;
+            }
+
+            /*$status = LINK_DELETED;
+            if ($apply['subscript']) {
+                $status = LINK_SUBSCRIPT;
+            }*/
+            $status = LINK_SUBSCRIPT;
+
+            if (db_exist_link_user_team($user['id'], $team['id'])) {
+                $success = db_update_link_user_team($user['id'], $team['id'], $status);
+            } else {
+                $success = db_insert_link_user_team($user['id'], $team['id'], $status);
+            }
+
+            if ($success) {
+                $this->return['success'] = true;
+            } else {
+                $this->return['success'] = false;
+                $this->return['msg'] = $GLOBALS['LANG']['APPLY_ERROR'];
             }
         } else {
             $this->return['success'] = false;

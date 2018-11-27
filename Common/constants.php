@@ -16,6 +16,11 @@ define('ERROR_LOGIN',         3);
 define('DATA_EMPTY',          4);
 define('NO_PERMISION',        5);
 
+define('LINK_DELETED',       -1);
+define('LINK_SUBSCRIPT',      0);
+define('LINK_APPLY',          1);
+define('LINK_MEMBER',         2);
+
 $WEATHER_SUMMARY = [
     [ 'summary' => 'Snow',      'index' => 12 ],
     [ 'summary' => 'Rain',      'index' => 6 ],
