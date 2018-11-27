@@ -16,17 +16,18 @@ function db_select_teams($conditions)
 
 function db_insert_team($team)
 {
+    $now = date('Y-m-d H:i:s');
     $data = array(
         'author'      => $team['author'],
         'category'    => $team['category'],
         'time_begin'  => trim($team['time_begin']),
         'time_end'    => trim($team['time_end']),
-        'need_review' => $team['need_review'],
-        'dp_self'     => $team['dp_self'],
-        'dp_other'    => $team['dp_other'],
-        'create_time' => Medoo::raw('NOW()'),
+        'need_review' => $team['review'],
+        'dp_self'     => $team['drop_self'],
+        'dp_other'    => $team['drop_other'],
+        'create_time' => $now,
         'status'      => $team['status'],
-        'people'      => $team['people'],
+        'people'      => $team['people_min'],
         'title'       => trim($team['title']),
         'location'    => trim($team['location']),
         'desc'        => trim($team['desc'])
