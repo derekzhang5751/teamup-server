@@ -7,7 +7,10 @@
 function db_check_user_login($userName, $password)
 {
     $user = $GLOBALS['db']->get('tu_user',
-        ['id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc'],
+        [
+            'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url'
+        ],
         [
             'email' => $userName,
             'password' => $password
@@ -20,14 +23,60 @@ function db_get_user_info($userId)
 {
     $user = $GLOBALS['db']->get('tu_user',
         [
-            'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'reg_time', 'desc',
-            'dev_uid', 'token', 'dev_type', 'dev_model', 'last_time'
+            'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url'
         ],
         [
             'id' => $userId
         ]
     );
     return $user;
+}
+
+function db_insert_user_session($session)
+{
+    $data = array(
+        'user_id'    => $session['user_id'],
+        'last_time'  => $session['last_time'],
+        'session_id' => $session['session_id'],
+        'dev_uid'    => $session['dev_uid'],
+        'dev_type'   => $session['dev_type'],
+        'dev_model'  => $session['dev_model'],
+        'token'      => $session['token']
+    );
+    $stat = $GLOBALS['db']->insert('tu_session', $data);
+    if ($stat->rowCount() == 1) {
+        return $GLOBALS['db']->id();
+    } else {
+        return false;
+    }
+}
+
+function db_get_user_session($sessionId)
+{
+    $session = $GLOBALS['db']->get('tu_session',
+        [
+            'id', 'user_id', 'last_time', 'session_id', 'dev_uid', 'dev_type', 'dev_model', 'token'
+        ],
+        [
+            'session_id' => $sessionId
+        ]
+    );
+    return $session;
+}
+
+function db_update_user_session($session)
+{
+    $data = array();
+    if (isset($session['session_id'])) {
+        $data['session_id'] = $session['session_id'];
+    }
+    $stat = $GLOBALS['db']->update('tu_session', $data,
+        [
+            'id' => $session['id']
+        ]
+    );
+    return $stat->rowCount();
 }
 
 //////////////////////////////////////////////////////////
