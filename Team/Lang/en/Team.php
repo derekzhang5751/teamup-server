@@ -7,3 +7,4 @@ $GLOBALS['LANG']['sample'] = 'TEAMUP API';
 $GLOBALS['LANG']['NO_USER'] = 'User does not exist.';
 $GLOBALS['LANG']['NO_TEAM'] = 'Team does not exist.';
 $GLOBALS['LANG']['APPLY_ERROR'] = 'A system error occurred, please try again later.';
+$GLOBALS['LANG']['LOGICAL_ERROR'] = 'A logical error occurred.';

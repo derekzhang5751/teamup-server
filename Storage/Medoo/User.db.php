@@ -65,6 +65,20 @@ function db_get_user_session($sessionId)
     return $session;
 }
 
+function db_get_user_session2($userId, $devUid)
+{
+    $session = $GLOBALS['db']->get('tu_session',
+        [
+            'id', 'user_id', 'last_time', 'session_id', 'dev_uid', 'dev_type', 'dev_model', 'token'
+        ],
+        [
+            'user_id' => $userId,
+            'dev_uid' => $devUid
+        ]
+    );
+    return $session;
+}
+
 function db_update_user_session($session)
 {
     $data = array();
