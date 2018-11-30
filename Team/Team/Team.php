@@ -168,7 +168,7 @@ class Team extends TeamupBase {
             }
 
             $status = LINK_MEMBER;
-            $success = db_update_link_user_team($user['id'], $team['id'], $status, $apply['remark']);
+            $success = db_update_link_user_team($apply['user_id'], $apply['team_id'], $status, $apply['remark']);
             if ($success) {
                 $this->return['success'] = true;
             } else {

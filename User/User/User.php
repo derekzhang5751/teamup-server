@@ -89,7 +89,7 @@ class User extends TeamupBase {
             // New session
             $data = array(
                 'user_id'    => $userId,
-                'last_time'  => $session['last_time'],
+                'last_time'  => now_utc(),
                 'session_id' => $sessionId,
                 'dev_uid'    => $devUid,
                 'dev_type'   => $devType,
