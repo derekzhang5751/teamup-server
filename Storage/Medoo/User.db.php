@@ -9,7 +9,7 @@ function db_check_user_login($userName, $password)
     $user = $GLOBALS['db']->get('tu_user',
         [
             'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
-            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url'
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url', 'source'
         ],
         [
             'email' => $userName,
@@ -19,15 +19,54 @@ function db_check_user_login($userName, $password)
     return $user;
 }
 
+function db_insert_user($user)
+{
+    $data = array(
+        'username'   => $user['username'],
+        'level'      => $user['level'],
+        'first_name' => $user['first_name'],
+        'last_name'  => $user['last_name'],
+        'email'      => $user['email'],
+        'mobile'     => $user['mobile'],
+        'sex'        => $user['sex'],
+        'birthday'   => $user['birthday'],
+        'is_active'  => $user['is_active'],
+        'reg_time'   => $user['reg_time'],
+        'desc'       => $user['desc'],
+        'photo_url'  => $user['photo_url'],
+        'source'     => $user['source']
+    );
+    $stat = $GLOBALS['db']->insert('tu_user', $data);
+    if ($stat->rowCount() == 1) {
+        return $GLOBALS['db']->id();
+    } else {
+        return false;
+    }
+}
+
 function db_get_user_info($userId)
 {
     $user = $GLOBALS['db']->get('tu_user',
         [
             'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
-            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url'
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url', 'source'
         ],
         [
             'id' => $userId
+        ]
+    );
+    return $user;
+}
+
+function db_get_user_by_email($email)
+{
+    $user = $GLOBALS['db']->get('tu_user',
+        [
+            'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url', 'source'
+        ],
+        [
+            'email' => $email
         ]
     );
     return $user;

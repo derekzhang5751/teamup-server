@@ -35,6 +35,8 @@ class Team extends TeamupBase {
             $this->processApplyList();
         } else if ($this->action == 'accept_apply') {
             $this->processAcceptApply();
+        } else if ($this->action == 'upload_image') {
+            $this->uploadFile();
         }
         return true;
     }
@@ -178,6 +180,69 @@ class Team extends TeamupBase {
         } else {
             $this->return['success'] = false;
             $this->return['data'] = $entityBody;
+        }
+    }
+
+    private function uploadFile() {
+        global $gConfig;
+        $target_dir = $gConfig['upload']['uploadpath'];
+        $maxSize = $gConfig['upload']['maxsize'];
+        //echo print_r($_FILES);
+        $buildingId = isset($_REQUEST["buildingid"]) ? trim($_REQUEST["buildingid"]) : '0';
+        $sensorId = isset($_REQUEST["sensorid"]) ? trim($_REQUEST["sensorid"]) : '0';
+        if (!$this->sensorCheck($sensorId, $buildingId)) {
+            $this->return['success'] = false;
+            $this->return['msg'] = 'Sensor does not exist.';
+            return;
+        }
+        
+        $imageFileType = strtolower(pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION));
+        //$target_file = $target_dir . basename($_FILES["file"]["name"]);
+        $target_file = $target_dir . $buildingId;
+        create_dir($target_file);
+        $target_file = $target_file . '/' . $sensorId . '.' . $imageFileType;
+        
+        $uploadOk = 1;
+        // Check if image file is a actual image or fake image
+        if (isset($_POST["submit"])) {
+            $check = getimagesize($_FILES["file"]["tmp_name"]);
+            if ($check !== false) {
+                //echo "File is an image - " . $check["mime"] . ".";
+                $uploadOk = 1;
+            } else {
+                $this->return['msg'] = 'File is NOT an image.';
+                $uploadOk = 0;
+            }
+        }
+        // Check if file already exists
+        if (file_exists($target_file)) {
+            $this->return['msg'] = 'Sorry, file already exists.';
+            $uploadOk = 0;
+        }
+        // Check file size
+        if ($_FILES["file"]["size"] > $maxSize) {
+            $this->return['msg'] = 'Sorry, your file is too large.';
+            $uploadOk = 0;
+        }
+        // Allow certain file formats
+        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
+            $this->return['msg'] = 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.';
+            $uploadOk = 0;
+        }
+        // Check if $uploadOk is set to 0 by an error
+        if ($uploadOk == 0) {
+            $this->return['success'] = false;
+        } else {
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                $this->return['success'] = true;
+                $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
+                // Update sensor's picture url
+                $picUrl = str_replace($target_dir, "http://iotapi.peakenergypower.com/sensorpic/", $target_file);
+                db_update_picurl_of_sensor($sensorId, $picUrl);
+            } else {
+                $this->return['success'] = false;
+                $this->return['msg'] = 'Sorry, there was an error uploading your file.';
+            }
         }
     }
 
