@@ -22,19 +22,18 @@ function db_check_user_login($userName, $password)
 function db_insert_user($user)
 {
     $data = array(
-        'username'   => $user['username'],
+        'username'   => trim($user['username']),
+        'password'   => '1234',
         'level'      => $user['level'],
-        'first_name' => $user['first_name'],
-        'last_name'  => $user['last_name'],
-        'email'      => $user['email'],
-        'mobile'     => $user['mobile'],
+        'first_name' => trim($user['first_name']),
+        'last_name'  => trim($user['last_name']),
+        'email'      => trim($user['email']),
+        'mobile'     => trim($user['mobile']),
         'sex'        => $user['sex'],
-        'birthday'   => $user['birthday'],
+        'birthday'   => trim($user['birthday']),
         'is_active'  => $user['is_active'],
-        'reg_time'   => $user['reg_time'],
-        'desc'       => $user['desc'],
-        'photo_url'  => $user['photo_url'],
-        'source'     => $user['source']
+        'reg_time'   => trim($user['reg_time']),
+        'desc'       => trim($user['desc'])
     );
     $stat = $GLOBALS['db']->insert('tu_user', $data);
     if ($stat->rowCount() == 1) {
@@ -226,28 +225,6 @@ function db_delete_user_team_link($userId, $teamId)
     );
     if ($stat->rowCount() > 0) {
         return true;
-    } else {
-        return false;
-    }
-}
-
-function db_insert_user($user)
-{
-    $data = array(
-        'username'   => trim($user['username']),
-        'password'   => '1234',
-        'level'      => $user['level'],
-        'first_name' => trim($user['first_name']),
-        'last_name'  => trim($user['last_name']),
-        'email'      => trim($user['email']),
-        'mobile'     => trim($user['mobile']),
-        'is_active'  => $user['is_active'],
-        'reg_time'   => trim($user['reg_time']),
-        'desc'       => trim($user['desc'])
-    );
-    $stat = $GLOBALS['db']->insert('tu_user', $data);
-    if ($stat->rowCount() == 1) {
-        return $GLOBALS['db']->id();
     } else {
         return false;
     }
