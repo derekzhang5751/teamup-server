@@ -38,6 +38,6 @@ $gConfig = [
     ],
     'upload' => [
         'uploadpath' => '/usr/local/apache2/htdocs/upload/',
-        'maxsize' => 1048576
+        'maxsize' => (1048576 * 5)
     ]
 ];

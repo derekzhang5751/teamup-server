@@ -28,6 +28,12 @@ class User extends TeamupBase {
         $this->return['data']['action'] = $this->action;
         if ($this->action == 'login') {
             return $this->processUserLogin();
+        } else if ($this->action == 'get_user') {
+            return $this->processGetUserProfile();
+        } else if ($this->action == 'save_profile') {
+            return $this->processSaveProfile();
+        } else if ($this->action == 'upload_photo') {
+            return $this->processUploadUserPhoto();
         }
         return false;
     }
@@ -108,6 +114,120 @@ class User extends TeamupBase {
             $this->return['msg'] = $GLOBALS['LANG']['LOGIN_ERROR'];
         }
         return true;
+    }
+
+    private function processGetUserProfile() {
+        $userId = isset($login['userid']) ? trim($login['userid']) : '0';
+        $user = db_get_user_info($userId);
+        if ($user) {
+            $this->return['success'] = true;
+            $this->return['data']['user'] = $user;
+            if ($user['photo_url']) {
+                $this->return['data']['user']['photo_url'] = 'http://www.moreppl.com' . $user['photo_url'];
+            } else {
+                $this->return['data']['user']['photo_url'] = '/assets/imgs/team-pic.png';
+            }
+        } else {
+            $this->return['success'] = false;
+            $this->return['msg'] = 'User does not exist.';
+        }
+        return true;
+    }
+
+    private function processSaveProfile() {
+        $firstName = '';
+        $lastName = '';
+        $mobile = '';
+        $sex = '';
+        $birthday = '';
+        $desc = '';
+        $entityBody = file_get_contents('php://input');
+        $user = json_decode($entityBody, true);
+        if ($user) {
+            $firstName = isset($user['first_name']) ? trim($user['first_name']) : '';
+            $lastName = isset($user['last_name']) ? trim($user['last_name']) : '';
+            $mobile = isset($user['mobile']) ? trim($user['mobile']) : '';
+            $sex = isset($user['sex']) ? trim($user['sex']) : '0';
+            $birthday = isset($user['birthday']) ? trim($user['birthday']) : '';
+            $desc = isset($user['desc']) ? trim($user['desc']) : '';
+        } else {
+            return false;
+        }
+        $ret = db_update_user_profile($user);
+        if ($ret > 0) {
+            $this->return['success'] = true;
+            $this->return['data']['user'] = $user;
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = [];
+            $this->return['msg'] = $GLOBALS['LANG']['SYS_ERROR'];
+        }
+        return true;
+    }
+
+    private function processUploadUserPhoto() {
+        global $gConfig;
+        $target_dir = $gConfig['upload']['uploadpath'];
+        $maxSize = $gConfig['upload']['maxsize'];
+        //echo print_r($_FILES);
+        $userId = isset($_REQUEST["userid"]) ? trim($_REQUEST["userid"]) : '0';
+        $user = db_get_user_info($userId);
+        if (!$user) {
+            $this->return['success'] = false;
+            $this->return['msg'] = 'User does not exist.';
+            return;
+        }
+        
+        $imageFileType = strtolower(pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION));
+        //$target_file = $target_dir . basename($_FILES["file"]["name"]);
+        $target_file = $target_dir . 'headphoto';
+        create_dir($target_file);
+        $target_file = $target_file . '/' . $userId . '.' . $imageFileType;
+        
+        $uploadOk = 1;
+        // Check if image file is a actual image or fake image
+        if (isset($_POST["submit"])) {
+            $check = getimagesize($_FILES["file"]["tmp_name"]);
+            if ($check !== false) {
+                //echo "File is an image - " . $check["mime"] . ".";
+                $uploadOk = 1;
+            } else {
+                $this->return['msg'] = 'File is NOT an image.';
+                $uploadOk = 0;
+            }
+        }
+        // Check if file already exists
+        if (file_exists($target_file)) {
+            //$this->return['msg'] = 'Sorry, file already exists.';
+            //$uploadOk = 0;
+            //chmod($target_file, 0755); //Change the file permissions if allowed
+            unlink($target_file); //remove the file
+        }
+        // Check file size
+        if ($_FILES["file"]["size"] > $maxSize) {
+            $this->return['msg'] = 'Sorry, your file is too large.';
+            $uploadOk = 0;
+        }
+        // Allow certain file formats
+        if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
+            $this->return['msg'] = 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.';
+            $uploadOk = 0;
+        }
+        // Check if $uploadOk is set to 0 by an error
+        if ($uploadOk == 0) {
+            $this->return['success'] = false;
+        } else {
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                $this->return['success'] = true;
+                $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
+                // Update sensor's picture url
+                $picUrl = str_replace($target_dir, "/", $target_file);
+                db_update_photo_of_user($userId, $picUrl);
+            } else {
+                $this->return['success'] = false;
+                $this->return['msg'] = 'Sorry, there was an error uploading your file.';
+            }
+        }
     }
 
     private function updateUserSession($userId, $devUid, $devType, $devModel, $token) {

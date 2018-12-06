@@ -43,6 +43,40 @@ function db_insert_user($user)
     }
 }
 
+function db_update_user_profile($user)
+{
+    if ($user['id'] <= 0) {
+        return false;
+    }
+    $cols = array(
+        'first_name' => trim($user['first_name']),
+        'last_name'  => trim($user['last_name']),
+        'mobile'     => trim($user['mobile']),
+        'sex'       => trim($user['sex']),
+        'birthday'     => trim($user['birthday']),
+        'desc'       => trim($user['desc'])
+    );
+    $data = $GLOBALS['db']->update('tu_user', $cols,
+        [
+            'id' => $user['id']
+        ]
+    );
+    return $data->rowCount();
+}
+
+function db_update_photo_of_user($userId, $photoUrl)
+{
+    $cols = array(
+        'photo_url' => $photoUrl
+    );
+    $data = $GLOBALS['db']->update('tu_user', $cols,
+        [
+            'id' => $userId
+        ]
+    );
+    return $data->rowCount();
+}
+
 function db_get_user_info($userId)
 {
     $user = $GLOBALS['db']->get('tu_user',
