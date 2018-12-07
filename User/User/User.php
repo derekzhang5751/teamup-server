@@ -117,13 +117,13 @@ class User extends TeamupBase {
     }
 
     private function processGetUserProfile() {
-        $userId = isset($login['userid']) ? trim($login['userid']) : '0';
+        $userId = isset($_REQUEST['userid']) ? trim($_REQUEST['userid']) : '0';
         $user = db_get_user_info($userId);
         if ($user) {
             $this->return['success'] = true;
             $this->return['data']['user'] = $user;
             if ($user['photo_url']) {
-                $this->return['data']['user']['photo_url'] = 'http://www.moreppl.com' . $user['photo_url'];
+                $this->return['data']['user']['photo_url'] = 'http://www.moreppl.com/upload' . $user['photo_url'];
             } else {
                 $this->return['data']['user']['photo_url'] = '/assets/imgs/team-pic.png';
             }
@@ -175,7 +175,7 @@ class User extends TeamupBase {
         if (!$user) {
             $this->return['success'] = false;
             $this->return['msg'] = 'User does not exist.';
-            return;
+            return true;
         }
         
         $imageFileType = strtolower(pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION));
@@ -228,6 +228,7 @@ class User extends TeamupBase {
                 $this->return['msg'] = 'Sorry, there was an error uploading your file.';
             }
         }
+        return true;
     }
 
     private function updateUserSession($userId, $devUid, $devType, $devModel, $token) {
