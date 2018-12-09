@@ -33,7 +33,8 @@ function db_insert_user($user)
         'birthday'   => trim($user['birthday']),
         'is_active'  => $user['is_active'],
         'reg_time'   => trim($user['reg_time']),
-        'desc'       => trim($user['desc'])
+        'desc'       => trim($user['desc']),
+        'source'     => trim($user['source'])
     );
     $stat = $GLOBALS['db']->insert('tu_user', $data);
     if ($stat->rowCount() == 1) {

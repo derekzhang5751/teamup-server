@@ -28,6 +28,8 @@ class User extends TeamupBase {
         $this->return['data']['action'] = $this->action;
         if ($this->action == 'login') {
             return $this->processUserLogin();
+        } else if ($this->action == 'signup') {
+            return $this->processUserSignup();
         } else if ($this->action == 'get_user') {
             return $this->processGetUserProfile();
         } else if ($this->action == 'save_profile') {
@@ -112,6 +114,64 @@ class User extends TeamupBase {
             $this->return['success'] = false;
             $this->return['data'] = [];
             $this->return['msg'] = $GLOBALS['LANG']['LOGIN_ERROR'];
+        }
+        return true;
+    }
+
+    private function processUserSignup() {
+        $username = '';
+        $password = '';
+        $devType = '';
+        $devUid = '';
+        $devModel = '';
+        $token = '';
+        $entityBody = file_get_contents('php://input');
+        $login = json_decode($entityBody, true);
+        if ($login) {
+            $username = isset($login['username']) ? trim($login['username']) : '';
+            $password = isset($login['password']) ? trim($login['password']) : '';
+            $devType = isset($login['dev_type']) ? trim($login['dev_type']) : 'Browser';
+            $devUid = isset($login['dev_uid']) ? trim($login['dev_uid']) : '';
+            $source = isset($login['source']) ? trim($login['source']) : 'moreppl';
+            $devModel = isset($login['dev_model']) ? trim($login['dev_model']) : '';
+            $token = isset($login['token']) ? trim($login['token']) : '';
+        } else {
+            return false;
+        }
+
+        $user = db_get_user_by_email($username);
+        if ($user) {
+            $this->return['success'] = false;
+            $this->return['data'] = [];
+            $this->return['msg'] = $GLOBALS['LANG']['SIGNUP_EMAIL_TAKEN'];
+            return true;
+        } else {
+            $data = [
+                'username'   => $username,
+                'level'      => 0,
+                'first_name' => '',
+                'last_name'  => '',
+                'email'      => $username,
+                'mobile'     => '',
+                'sex'        => 0,
+                'birthday'   => '',
+                'is_active'  => 0,
+                'reg_time'   => now_utc(),
+                'desc'       => '',
+                'photo_url'  => '',
+                'source'     => 'moreppl'
+            ];
+            db_insert_user($data);
+            $user = db_get_user_by_email($username);
+        }
+        
+        if ($user) {
+            $this->return['success'] = true;
+            $this->return['data']['user'] = $user;
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = [];
+            $this->return['msg'] = $GLOBALS['LANG']['SYS_ERROR'];
         }
         return true;
     }
