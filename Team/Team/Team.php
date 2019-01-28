@@ -53,7 +53,7 @@ class Team extends TeamupBase {
     }
 
     private function processCreateTeam() {
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $team = json_decode($entityBody, true);
         if ($team) {
             $id = db_insert_team($team);
@@ -71,7 +71,7 @@ class Team extends TeamupBase {
     }
 
     private function processSearchTeams() {
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $cond = json_decode($entityBody, true);
         if ($cond) {
             $condition = [];
@@ -101,7 +101,7 @@ class Team extends TeamupBase {
     }
 
     private function processApplyTeam() {
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $apply = json_decode($entityBody, true);
         if ($apply) {
             $user = db_get_user_info($apply['user_id']);
@@ -159,7 +159,7 @@ class Team extends TeamupBase {
     }
 
     private function processAcceptApply() {
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $apply = json_decode($entityBody, true);
         if ($apply) {
             $status = $apply['status'];

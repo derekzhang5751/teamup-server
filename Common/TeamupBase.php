@@ -29,4 +29,9 @@ class TeamupBase extends \Bricker\RequestLifeCircle {
         exit('Not support !!');
     }
     
+    protected function getRequestBody() {
+        $body = file_get_contents('php://input');
+        return $body;
+    }
+    
 }

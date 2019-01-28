@@ -51,7 +51,7 @@ class User extends TeamupBase {
         $devUid = '';
         $devModel = '';
         $token = '';
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $login = json_decode($entityBody, true);
         if ($login) {
             $username = isset($login['username']) ? trim($login['username']) : '';
@@ -121,20 +121,15 @@ class User extends TeamupBase {
     private function processUserSignup() {
         $username = '';
         $password = '';
-        $devType = '';
-        $devUid = '';
-        $devModel = '';
-        $token = '';
-        $entityBody = file_get_contents('php://input');
-        $login = json_decode($entityBody, true);
+        $nameType = '';
+        $source = '';
+        $entityBody = $this->getRequestBody();
+        $signup = json_decode($entityBody, true);
         if ($login) {
-            $username = isset($login['username']) ? trim($login['username']) : '';
-            $password = isset($login['password']) ? trim($login['password']) : '';
-            $devType = isset($login['dev_type']) ? trim($login['dev_type']) : 'Browser';
-            $devUid = isset($login['dev_uid']) ? trim($login['dev_uid']) : '';
-            $source = isset($login['source']) ? trim($login['source']) : 'moreppl';
-            $devModel = isset($login['dev_model']) ? trim($login['dev_model']) : '';
-            $token = isset($login['token']) ? trim($login['token']) : '';
+            $username = isset($signup['username']) ? trim($signup['username']) : '';
+            $password = isset($signup['password']) ? trim($signup['password']) : '';
+            $nameType = isset($signup['name_type']) ? trim($signup['name_type']) : 'email';
+            $source = isset($signup['source']) ? trim($signup['source']) : 'moreppl';
         } else {
             return false;
         }
@@ -146,32 +141,29 @@ class User extends TeamupBase {
             $this->return['msg'] = $GLOBALS['LANG']['SIGNUP_EMAIL_TAKEN'];
             return true;
         } else {
+            $regTime = now_utc();
+            $code = md5($regTime);
             $data = [
-                'username'   => $username,
-                'level'      => 0,
-                'first_name' => '',
-                'last_name'  => '',
-                'email'      => $username,
-                'mobile'     => '',
-                'sex'        => 0,
-                'birthday'   => '',
-                'is_active'  => 0,
-                'reg_time'   => now_utc(),
-                'desc'       => '',
-                'photo_url'  => '',
-                'source'     => 'moreppl'
+                'id'          => 0,
+                'activate_id' => $code,
+                'username'    => $username,
+                'password'    => $password,
+                'name_type'   => $nameType,
+                'reg_time'    => $regTime,
+                'status'      => 0
             ];
-            db_insert_user($data);
-            $user = db_get_user_by_email($username);
-        }
-        
-        if ($user) {
+            $session = db_get_signup_session_by_name($username);
+            if ($session) {
+                // Update signup session
+                $data['id'] = $session['id'];
+                db_update_signup_session($signup);
+            } else {
+                // Insert a new signup session
+                db_insert_signup_session($signup);
+            }
             $this->return['success'] = true;
-            $this->return['data']['user'] = $user;
-        } else {
-            $this->return['success'] = false;
-            $this->return['data'] = [];
-            $this->return['msg'] = $GLOBALS['LANG']['SYS_ERROR'];
+            $this->return['msg'] = '';
+            return true;
         }
         return true;
     }
@@ -201,7 +193,7 @@ class User extends TeamupBase {
         $sex = '';
         $birthday = '';
         $desc = '';
-        $entityBody = file_get_contents('php://input');
+        $entityBody = $this->getRequestBody();
         $user = json_decode($entityBody, true);
         if ($user) {
             $firstName = isset($user['first_name']) ? trim($user['first_name']) : '';

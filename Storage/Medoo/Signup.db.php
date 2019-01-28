@@ -22,9 +22,22 @@ function db_insert_signup_session($signup)
     }
 }
 
-function db_get_signup_session($activateId, $username, $nameType)
+function db_get_signup_session_by_name($username)
 {
-    $team = $GLOBALS['db']->get('tu_signup',
+    $signup = $GLOBALS['db']->get('tu_signup',
+        [
+            'id', 'activate_id', 'username', 'name_type', 'reg_time', 'status'
+        ],
+        [
+            'username' => $username
+        ]
+    );
+    return $signup;
+}
+
+function db_get_signup_session_by_code($activateId)
+{
+    $signup = $GLOBALS['db']->get('tu_signup',
         [
             'id', 'activate_id', 'username', 'name_type', 'reg_time', 'status'
         ],
@@ -32,7 +45,7 @@ function db_get_signup_session($activateId, $username, $nameType)
             'activate_id' => $activateId
         ]
     );
-    return $team;
+    return $signup;
 }
 
 function db_mark_expired_session($hours)
@@ -56,6 +69,24 @@ function db_update_signup_status($activateId)
     $stat = $GLOBALS['db']->update('tu_signup', $data,
         [
             'activate_id' => $activateId
+        ]
+    );
+    return $stat->rowCount();
+}
+
+function db_update_signup_session($signup)
+{
+    $data = array(
+        'activate_id' => $signup['activate_id'],
+        'password' => $signup['password'],
+        'name_type' => $signup['name_type'],
+        'reg_time' => $signup['reg_time'],
+        'status' => 0
+    );
+    $stat = $GLOBALS['db']->update('tu_signup', $data,
+        [
+            'id' => $signup['id'],
+            'username' => $signup['username']
         ]
     );
     return $stat->rowCount();
