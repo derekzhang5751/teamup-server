@@ -125,7 +125,7 @@ class User extends TeamupBase {
         $source = '';
         $entityBody = $this->getRequestBody();
         $signup = json_decode($entityBody, true);
-        if ($login) {
+        if ($signup) {
             $username = isset($signup['username']) ? trim($signup['username']) : '';
             $password = isset($signup['password']) ? trim($signup['password']) : '';
             $nameType = isset($signup['name_type']) ? trim($signup['name_type']) : 'email';
@@ -156,10 +156,10 @@ class User extends TeamupBase {
             if ($session) {
                 // Update signup session
                 $data['id'] = $session['id'];
-                db_update_signup_session($signup);
+                db_update_signup_session($data);
             } else {
                 // Insert a new signup session
-                db_insert_signup_session($signup);
+                db_insert_signup_session($data);
             }
             $this->return['success'] = true;
             $this->return['msg'] = '';
