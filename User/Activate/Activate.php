@@ -4,7 +4,7 @@
  * Date: 2019.02
  */
 
-class Battery extends TeamupBase {
+class Activate extends TeamupBase {
     private $action;
     private $activateCode;
     
