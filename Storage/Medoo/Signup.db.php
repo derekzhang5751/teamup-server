@@ -61,7 +61,7 @@ function db_mark_expired_session($hours)
     return $stat->rowCount();
 }
 
-function db_update_signup_status($activateId)
+function db_activate_signup_status($activateId)
 {
     $data = array(
         'status' => 1
