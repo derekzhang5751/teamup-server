@@ -21,22 +21,7 @@ function db_check_user_login($userName, $password)
 
 function db_insert_user($user)
 {
-    $data = array(
-        'username'   => trim($user['username']),
-        'password'   => '1234',
-        'level'      => $user['level'],
-        'first_name' => trim($user['first_name']),
-        'last_name'  => trim($user['last_name']),
-        'email'      => trim($user['email']),
-        'mobile'     => trim($user['mobile']),
-        'sex'        => $user['sex'],
-        'birthday'   => trim($user['birthday']),
-        'is_active'  => $user['is_active'],
-        'reg_time'   => trim($user['reg_time']),
-        'desc'       => trim($user['desc']),
-        'source'     => trim($user['source'])
-    );
-    $stat = $GLOBALS['db']->insert('tu_user', $data);
+    $stat = $GLOBALS['db']->insert('tu_user', $user);
     if ($stat->rowCount() == 1) {
         return $GLOBALS['db']->id();
     } else {

@@ -13,16 +13,10 @@ require BRICKER_PATH . '/Database/Medoo/Medoo.php';
 
 use Medoo\Medoo;
 
-$gDbConnector = null;
-
-function getDatabase() {
-    global $gDbConnector, $gConfig;
+function initDatabases() {
+    global $gConfig;
     
-    if ($gDbConnector) {
-        return $gDbConnector;
-    } else {
-        $gDbConnector = new Medoo($gConfig['db']);
+    foreach ($gConfig['dbs'] as $key => $value) {
+        $GLOBALS[$key] = new Medoo($value);
     }
-    
-    return $gDbConnector;
 }

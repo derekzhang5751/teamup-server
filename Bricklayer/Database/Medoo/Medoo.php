@@ -40,9 +40,8 @@ class Medoo
 
 	public function __construct($options = null)
 	{
-        global $gConfig;
-        $this->trace = $gConfig['db']['trace'];
-        $this->threshold = $gConfig['db']['threshold'];
+        $this->trace = $options['trace'];
+        $this->threshold = $options['threshold'];
         
 		try {
 			if (is_array($options))

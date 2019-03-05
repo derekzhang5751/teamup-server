@@ -39,7 +39,7 @@ function db_get_signup_session_by_code($activateId)
 {
     $signup = $GLOBALS['db']->get('tu_signup',
         [
-            'id', 'activate_id', 'username', 'name_type', 'reg_time', 'status'
+            'id', 'activate_id', 'username', 'password', 'name_type', 'reg_time', 'status'
         ],
         [
             'activate_id' => $activateId

@@ -33,18 +33,17 @@ function db_get_team_info($teamId)
 
 function db_insert_team($team)
 {
-    $now = date('Y-m-d H:i:s');
     $data = array(
         'author'      => $team['author'],
         'category'    => $team['category'],
-        'time_begin'  => trim($team['time_begin']),
+        'time_begin'  => time_local_to_utc( trim($team['time_begin']) ),
         'time_end'    => trim($team['time_end']),
-        'need_review' => $team['review'],
-        'dp_self'     => $team['drop_self'],
-        'dp_other'    => $team['drop_other'],
-        'create_time' => $now,
+        'need_review' => $team['need_review'],
+        'dp_self'     => $team['dp_self'],
+        'dp_other'    => $team['dp_other'],
+        'create_time' => now_utc(),
         'status'      => $team['status'],
-        'people'      => $team['people_min'],
+        'people'      => $team['people'],
         'title'       => trim($team['title']),
         'location'    => trim($team['location']),
         'desc'        => trim($team['desc'])

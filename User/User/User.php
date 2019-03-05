@@ -81,6 +81,7 @@ class User extends TeamupBase {
                 }
                 $data = [
                     'username'   => $username,
+                    'password'   => '1234',
                     'level'      => 0,
                     'first_name' => $firstName,
                     'last_name'  => $lastName,

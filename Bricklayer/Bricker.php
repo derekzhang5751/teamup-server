@@ -51,7 +51,7 @@ if (isset( $_REQUEST['DeviceType'] )) {
 /*
  * init database
  */
-$db = getDatabase();
+initDatabases();
 
 /*
  * init log

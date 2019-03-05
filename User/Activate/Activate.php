@@ -45,6 +45,22 @@ class Activate extends TeamupBase {
         $session = db_get_signup_session_by_code($this->activateCode);
         if ($session) {
             db_activate_signup_status($this->activateCode);
+            $data = [
+                'username'   => $session['username'],
+                'password'   => $session['password'],
+                'level'      => 0,
+                'first_name' => '',
+                'last_name'  => '',
+                'email'      => $session['username'],
+                'mobile'     => '',
+                'sex'        => 0,
+                'is_active'  => 1,
+                'reg_time'   => now_utc(),
+                'desc'       => '',
+                'photo_url'  => '',
+                'source'     => 'moreppl'
+            ];
+            db_insert_user($data);
             $this->return['msg'] = 'Your account has been activated, please login.';
         } else {
             $this->return['msg'] = 'Activate code doen not exist !';

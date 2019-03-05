@@ -79,6 +79,12 @@ abstract class RequestLifeCircle
         exit($json);
     }
     
+    protected function jsonResponseDirect($result) {
+        $json = json_encode($result);
+        $this->traceEnd();
+        exit($json);
+    }
+    
     protected function traceBegin() {
         if ($this->trace) {
             $this->timeBegin = microtime(true);
