@@ -103,6 +103,10 @@ class User extends TeamupBase {
         if ($user) {
             $sessionId = $this->updateUserSession($user['id'], $devUid, $devType, $devModel, $token);
             if ($sessionId) {
+                if (empty($user['first_name'])) {
+                    $d_list = explode("@", $user['email']);
+                    $user['first_name'] = $d_list[0];
+                }
                 $this->return['success'] = true;
                 $this->return['data']['user'] = $user;
                 $this->return['data']['session'] = $sessionId;
