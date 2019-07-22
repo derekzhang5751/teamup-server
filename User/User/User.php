@@ -36,6 +36,8 @@ class User extends TeamupBase {
             return $this->processSaveProfile();
         } else if ($this->action == 'upload_photo') {
             return $this->processUploadUserPhoto();
+        } else if ($this->action == 'change_password') {
+            return $this->changePassword();
         }
         return false;
     }
@@ -319,6 +321,39 @@ class User extends TeamupBase {
         } else {
             return false;
         }
+    }
+
+    private function changePassword() {
+        $userId = '';
+        $oldPass = '';
+        $newPass = '';
+        $entityBody = $this->getRequestBody();
+        $reqData = json_decode($entityBody, true);
+        if ($reqData) {
+            $userId = isset($reqData['userId']) ? trim($reqData['userId']) : '';
+            $oldPass = isset($reqData['oldPass']) ? trim($reqData['oldPass']) : '';
+            $newPass = isset($reqData['newPass']) ? trim($reqData['newPass']) : '';
+        } else {
+            return false;
+        }
+
+        $user = db_check_user_available($userId, $oldPass);
+        if (!$user) {
+            $this->return['success'] = false;
+            $this->return['data'] = [];
+            $this->return['msg'] = 'Password is not correct.';
+            return false;
+        }
+
+        $ret = db_update_user_password($userId, $newPass);
+        if ($ret > 0) {
+            $this->return['success'] = true;
+        } else {
+            $this->return['success'] = false;
+            $this->return['data'] = [];
+            $this->return['msg'] = $GLOBALS['LANG']['SYS_ERROR'];
+        }
+        return true;
     }
 
 }

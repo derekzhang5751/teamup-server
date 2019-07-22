@@ -19,6 +19,21 @@ function db_check_user_login($userName, $password)
     return $user;
 }
 
+function db_check_user_available($userId, $password)
+{
+    $user = $GLOBALS['db']->get('tu_user',
+        [
+            'id', 'username', 'level', 'first_name', 'last_name', 'email', 'mobile', 'sex',
+            'birthday', 'is_active', 'reg_time', 'desc', 'photo_url', 'source'
+        ],
+        [
+            'id' => $userId,
+            'password' => $password
+        ]
+    );
+    return $user;
+}
+
 function db_insert_user($user)
 {
     $stat = $GLOBALS['db']->insert('tu_user', $user);
@@ -45,6 +60,22 @@ function db_update_user_profile($user)
     $data = $GLOBALS['db']->update('tu_user', $cols,
         [
             'id' => $user['id']
+        ]
+    );
+    return $data->rowCount();
+}
+
+function db_update_user_password($userId, $newPass)
+{
+    if ($userId <= 0) {
+        return false;
+    }
+    $cols = array(
+        'password' => trim($newPass)
+    );
+    $data = $GLOBALS['db']->update('tu_user', $cols,
+        [
+            'id' => $userId
         ]
     );
     return $data->rowCount();
