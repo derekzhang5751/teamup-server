@@ -25,10 +25,12 @@ class Team extends TeamupBase {
         $this->return['data']['action'] = $this->action;
         if ($this->action == 'team_list') {
             $this->processGetTeamList();
+        } else if ($this->action == 'get_team_detail') {
+            $this->processGetTeamDetail();
         } else if ($this->action == 'search_team') {
             $this->processSearchTeams();
-        } else if ($this->action == 'create_team') {
-            $this->processCreateTeam();
+        } else if ($this->action == 'save_team') {
+            $this->processSaveTeam();
         } else if ($this->action == 'apply_team') {
             $this->processApplyTeam();
         } else if ($this->action == 'list_apply') {
@@ -52,11 +54,17 @@ class Team extends TeamupBase {
         $teamList = db_select_teams($conditions);
     }
 
-    private function processCreateTeam() {
+    private function processSaveTeam() {
         $entityBody = $this->getRequestBody();
         $team = json_decode($entityBody, true);
         if ($team) {
-            $id = db_insert_team($team);
+            if ($team['id'] > 0) {
+                // Update the team
+                db_update_team($team);
+                $id = $team['id'];
+            } else {
+                $id = db_insert_team($team);
+            }
             if ($id) {
                 $this->return['success'] = true;
                 $this->return['data']['teamId'] = $id;
@@ -90,7 +98,21 @@ class Team extends TeamupBase {
             $teams = db_select_teams($condition);
             if ($teams) {
                 $this->return['success'] = true;
-                $this->return['data'] = $teams;
+                $this->return['data']['recommended'] = [];
+                $this->return['data']['recent'] = [];
+                foreach ($teams as $team) {
+                    $brief = [
+                        id => $team['id'],
+                        author => $team['author'],
+                        time_begin => $team['time_begin'],
+                        time_end => $team['time_end'],
+                        status => $team['status'],
+                        title => $team['title'],
+                        photo => '/team/photo.jpeg'
+                    ];
+                    array_push($this->return['data']['recommended'], $brief);
+                    array_push($this->return['data']['recent'], $brief);
+                }
             } else {
                 $this->return['success'] = true;
                 $this->return['data'] = [];
@@ -98,6 +120,18 @@ class Team extends TeamupBase {
         } else {
             $this->return['success'] = false;
             $this->return['data'] = $entityBody;
+        }
+    }
+
+    private function processGetTeamDetail() {
+        $teamId = isset($_REQUEST['teamid']) ? trim($_REQUEST['teamid']) : '0';
+        $team = db_get_team_info($teamId);
+        if ($team) {
+            $this->return['success'] = true;
+            $this->return['data']['team'] = $team;
+        } else {
+            $this->return['success'] = false;
+            $this->return['data']['team'] = [];
         }
     }
 

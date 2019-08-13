@@ -57,6 +57,31 @@ function db_insert_team($team)
     }
 }
 
+function db_update_team($team)
+{
+    $cols = array(
+        'author'      => $team['author'],
+        'category'    => $team['category'],
+        'time_begin'  => time_local_to_utc( trim($team['time_begin']) ),
+        'time_end'    => trim($team['time_end']),
+        'need_review' => $team['need_review'],
+        'dp_self'     => $team['dp_self'],
+        'dp_other'    => $team['dp_other'],
+        //'create_time' => now_utc(),
+        'status'      => $team['status'],
+        'people'      => $team['people'],
+        'title'       => trim($team['title']),
+        'location'    => trim($team['location']),
+        'desc'        => trim($team['desc'])
+    );
+    $data = $GLOBALS['db']->update('tu_team', $cols,
+        [
+            'id' => $team['id']
+        ]
+    );
+    return $data->rowCount();
+}
+
 function db_update_team_status($id, $status)
 {
     $cols = array(
