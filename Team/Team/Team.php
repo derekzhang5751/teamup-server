@@ -59,7 +59,7 @@ class Team extends TeamupBase {
             $id = db_insert_team($team);
             if ($id) {
                 $this->return['success'] = true;
-                $this->return['data']['userId'] = $id;
+                $this->return['data']['teamId'] = $id;
             } else {
                 $this->return['success'] = false;
                 $this->return['msg'] = 'Create the team error!';
