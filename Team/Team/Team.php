@@ -39,6 +39,10 @@ class Team extends TeamupBase {
             $this->processAcceptApply();
         } else if ($this->action == 'upload_image') {
             $this->uploadFile();
+        } else if ($this->action == 'get_user_follows') {
+            return $this->processGetUserFolloes();
+        } else if ($this->action == 'get_user_myteams') {
+            return $this->processGetUserMyTeams();
         }
         return true;
     }
@@ -279,6 +283,50 @@ class Team extends TeamupBase {
                 $this->return['msg'] = 'Sorry, there was an error uploading your file.';
             }
         }
+    }
+
+    private function processGetUserFolloes() {
+        $userId = isset($_REQUEST['userid']) ? trim($_REQUEST['userid']) : '0';
+        $conditions = [
+            'author' => $userId
+        ];
+        $teams = db_select_teams($conditions);
+        $this->return['data']['follows'] = [];
+        foreach ($teams as $team) {
+            $brief = [
+                id => $team['id'],
+                author => $team['author'],
+                time_begin => $team['time_begin'],
+                time_end => $team['time_end'],
+                status => $team['status'],
+                title => $team['title'],
+                photo => '/team/photo.jpeg'
+            ];
+            array_push($this->return['data']['follows'], $brief);
+        }
+        $this->return['success'] = true;
+    }
+
+    private function processGetUserMyTeams() {
+        $userId = isset($_REQUEST['userid']) ? trim($_REQUEST['userid']) : '0';
+        $conditions = [
+            'author' => $userId
+        ];
+        $teams = db_select_teams($conditions);
+        $this->return['data']['myteams'] = [];
+        foreach ($teams as $team) {
+            $brief = [
+                id => $team['id'],
+                author => $team['author'],
+                time_begin => $team['time_begin'],
+                time_end => $team['time_end'],
+                status => $team['status'],
+                title => $team['title'],
+                photo => '/team/photo.jpeg'
+            ];
+            array_push($this->return['data']['myteams'], $brief);
+        }
+        $this->return['success'] = true;
     }
 
 }
