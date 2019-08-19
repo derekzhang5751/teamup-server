@@ -5,11 +5,14 @@
  */
 
 class TeamupBase extends \Bricker\RequestLifeCircle {
+    protected $currentUserId = 0;
 
     public function __construct() {
     }
     
     protected function prepareRequestParams() {
+        // Get current user id from session
+        $this->currentUserId = 1;
         return true;
     }
     

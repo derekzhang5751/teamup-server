@@ -97,13 +97,30 @@ function db_update_team_status($id, $status)
 
 function db_exist_link_user_team($userId, $teamId)
 {
-    $exist = $GLOBALS['db']->has('tu_link_user_team',
+    /*if ($GLOBALS['db']->has('tu_link_user_team', [
+        'AND' => [
+            'user_id' => (int)$userId,
+            'team_id' => (int)$teamId
+        ]
+    ])) {
+        return true;
+    } else {
+        return false;
+    }*/
+    $link = $GLOBALS['db']->get('tu_link_user_team',
         [
-            'user_id' => $userId,
-            'team_id' => $teamId
+            'id', 'user_id', 'team_id', 'status', 'remark'
+        ],
+        [
+            'user_id' => (int)$userId,
+            'team_id' => (int)$teamId
         ]
     );
-    return $exist;
+    if ($link && $link['id'] > 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function db_insert_link_user_team($userId, $teamId, $status, $remark)
@@ -172,4 +189,47 @@ function db_get_floors_of_building($buildingId, $desc)
     ])->fetchAll();
     //var_dump( $GLOBALS['db']->error() );
     return $floors;
+}
+
+function db_insert_team_photo($teamId, $picUrl)
+{
+    $data = array(
+        'team_id'    => $teamId,
+        'store_type' => 0,
+        'status'     => 0,
+        'pic_url'    => $picUrl
+    );
+
+    $stat = $GLOBALS['db']->insert('tu_team_photo', $data);
+    if ($stat->rowCount() == 1) {
+        return $GLOBALS['db']->id();
+    } else {
+        return false;
+    }
+}
+
+function db_update_team_photo_status($photoId, $status) {
+    $cols = array(
+        'status' => $status
+    );
+    $data = $GLOBALS['db']->update('tu_team_photo', $cols,
+        [
+            'id' => $photoId
+        ]
+    );
+    return $data->rowCount();
+}
+
+function db_select_team_photos($teamId)
+{
+    $list = $GLOBALS['db']->select('tu_team_photo',
+        [
+            'id', 'team_id', 'store_type', 'status', 'pic_url'
+        ],
+        [
+            'team_id' => $teamId,
+            'ORDER' => ['id' => 'ASC']
+        ]
+    );
+    return $list;
 }

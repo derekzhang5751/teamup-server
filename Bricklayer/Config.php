@@ -36,6 +36,6 @@ $gConfig = [
     ],
     'upload' => [
         'uploadpath' => '/Users/derek/workspace/teamup/teamup-server/upload/',
-        'maxsize' => 1048576
+        'maxsize' => 10485760
     ]
 ];

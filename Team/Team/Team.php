@@ -16,8 +16,10 @@ class Team extends TeamupBase {
     }
 
     protected function prepareRequestParams() {
+        parent::prepareRequestParams();
+
         $this->action = isset($_REQUEST['action']) ? trim($_REQUEST['action']) : '';
-        
+
         return true;
     }
 
@@ -38,11 +40,13 @@ class Team extends TeamupBase {
         } else if ($this->action == 'accept_apply') {
             $this->processAcceptApply();
         } else if ($this->action == 'upload_image') {
-            $this->uploadFile();
+            $this->uploadTeamImage();
         } else if ($this->action == 'get_user_follows') {
-            return $this->processGetUserFolloes();
+            $this->processGetUserFolloes();
         } else if ($this->action == 'get_user_myteams') {
-            return $this->processGetUserMyTeams();
+            $this->processGetUserMyTeams();
+        } else if ($this->action == 'get_team_photos') {
+            $this->processGetTeamPhotos();
         }
         return true;
     }
@@ -149,12 +153,14 @@ class Team extends TeamupBase {
                 $this->return['msg'] = $GLOBALS['LANG']['NO_USER'];
                 return;
             }
+            $this->return['data']['user'] = $user;
             $team = db_get_team_info($apply['team_id']);
             if (!$team) {
                 $this->return['success'] = false;
                 $this->return['msg'] = $GLOBALS['LANG']['NO_TEAM'];
                 return;
             }
+            $this->return['data']['team'] = $team;
 
             $status = $apply['status'];
             if ($status > 0) {
@@ -167,7 +173,9 @@ class Team extends TeamupBase {
                 $status = LINK_SUBSCRIPT;
             }
 
-            if (db_exist_link_user_team($user['id'], $team['id'])) {
+            $exist = db_exist_link_user_team($user['id'], $team['id']);
+            $this->return['data']['exist'] = $exist;
+            if ($exist) {
                 $success = db_update_link_user_team($user['id'], $team['id'], $status, $apply['remark']);
             } else {
                 $success = db_insert_link_user_team($user['id'], $team['id'], $status, $apply['remark']);
@@ -222,24 +230,26 @@ class Team extends TeamupBase {
         }
     }
 
-    private function uploadFile() {
+    private function uploadTeamImage() {
         global $gConfig;
         $target_dir = $gConfig['upload']['uploadpath'];
         $maxSize = $gConfig['upload']['maxsize'];
         //echo print_r($_FILES);
-        $buildingId = isset($_REQUEST["buildingid"]) ? trim($_REQUEST["buildingid"]) : '0';
-        $sensorId = isset($_REQUEST["sensorid"]) ? trim($_REQUEST["sensorid"]) : '0';
-        if (!$this->sensorCheck($sensorId, $buildingId)) {
+        $userId = $this->currentUserId;
+        $teamId = isset($_REQUEST["teamid"]) ? trim($_REQUEST["teamid"]) : '0';
+        $team = db_get_team_info($teamId);
+        if (!$team || $team['author'] != $userId) {
             $this->return['success'] = false;
-            $this->return['msg'] = 'Sensor does not exist.';
+            $this->return['msg'] = 'Team does not exist.' . $teamId;
+            $this->return['data']['team'] = $team;
             return;
         }
         
         $imageFileType = strtolower(pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION));
         //$target_file = $target_dir . basename($_FILES["file"]["name"]);
-        $target_file = $target_dir . $buildingId;
+        $target_file = $target_dir . 'teamimage001';
         create_dir($target_file);
-        $target_file = $target_file . '/' . $sensorId . '.' . $imageFileType;
+        $target_file = $target_file . '/team-' . $teamId . '_' . date('YmdHis') . '.' . $imageFileType;
         
         $uploadOk = 1;
         // Check if image file is a actual image or fake image
@@ -276,8 +286,9 @@ class Team extends TeamupBase {
                 $this->return['success'] = true;
                 $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
                 // Update sensor's picture url
-                $picUrl = str_replace($target_dir, "http://iotapi.peakenergypower.com/sensorpic/", $target_file);
-                db_update_picurl_of_sensor($sensorId, $picUrl);
+                $picUrl = str_replace($target_dir, "/", $target_file);
+                $picUrl = '/upload' . $picUrl;
+                db_insert_team_photo($teamId, $picUrl);
             } else {
                 $this->return['success'] = false;
                 $this->return['msg'] = 'Sorry, there was an error uploading your file.';
@@ -325,6 +336,23 @@ class Team extends TeamupBase {
                 photo => '/team/photo.jpeg'
             ];
             array_push($this->return['data']['myteams'], $brief);
+        }
+        $this->return['success'] = true;
+    }
+
+    private function processGetTeamPhotos() {
+        $teamId = isset($_REQUEST['teamid']) ? trim($_REQUEST['teamid']) : '0';
+        $photos = db_select_team_photos($teamId);
+        $this->return['data']['photos'] = [];
+        foreach ($photos as $item) {
+            $p = [
+                'id' => $item['id'],
+                'team_id' => $item['team_id'],
+                'store_type' => $item['store_type'],
+                'status' => $item['status'],
+                'pic_url' => 'http://teamup.loc' . $item['pic_url']
+            ];
+            array_push($this->return['data']['photos'], $p);
         }
         $this->return['success'] = true;
     }

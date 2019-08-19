@@ -16,6 +16,8 @@ class User extends TeamupBase {
     }
 
     protected function prepareRequestParams() {
+        parent::prepareRequestParams();
+
         $this->action = isset($_REQUEST['action']) ? trim($_REQUEST['action']) : '';
         if (empty($this->action)) {
             return false;
@@ -182,13 +184,14 @@ class User extends TeamupBase {
             $this->return['success'] = true;
             $this->return['data']['user'] = $user;
             if ($user['photo_url']) {
-                $this->return['data']['user']['photo_url'] = 'http://www.moreppl.com/upload' . $user['photo_url'];
+                $this->return['data']['user']['photo_url'] = $user['photo_url'];
             } else {
-                $this->return['data']['user']['photo_url'] = '/assets/imgs/team-pic.png';
+                $this->return['data']['user']['photo_url'] = '/upload/default/head.svg';
             }
         } else {
             $this->return['success'] = false;
             $this->return['msg'] = 'User does not exist.';
+            $this->return['data']['userid'] = $userId;
         }
         return true;
     }
@@ -229,7 +232,7 @@ class User extends TeamupBase {
         $target_dir = $gConfig['upload']['uploadpath'];
         $maxSize = $gConfig['upload']['maxsize'];
         //echo print_r($_FILES);
-        $userId = isset($_REQUEST["userid"]) ? trim($_REQUEST["userid"]) : '0';
+        $userId = $this->currentUserId; // isset($_REQUEST["userid"]) ? trim($_REQUEST["userid"]) : '0';
         $user = db_get_user_info($userId);
         if (!$user) {
             $this->return['success'] = false;
@@ -281,6 +284,7 @@ class User extends TeamupBase {
                 $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
                 // Update sensor's picture url
                 $picUrl = str_replace($target_dir, "/", $target_file);
+                $picUrl = '/upload' . $picUrl;
                 db_update_photo_of_user($userId, $picUrl);
             } else {
                 $this->return['success'] = false;
