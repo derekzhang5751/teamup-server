@@ -10,6 +10,7 @@
 namespace Bricker;
 
 $gConfig = [
+    'res_domain' => 'http://restest.peakenergypower.com',
     'trace' => true,
     'dbs' => [
         'db' => [

@@ -243,9 +243,10 @@ class Medoo
 			foreach ($commands as $value)
 			{
 				$this->pdo->exec($value);
-			}
+            }
 		}
 		catch (PDOException $e) {
+            // exit($e->getMessage());
 			throw new Exception($e->getMessage());
 		}
 	}
