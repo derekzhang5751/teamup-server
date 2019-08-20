@@ -180,10 +180,10 @@ class User extends TeamupBase {
     }
 
     private function sendActivateEmail($toEmail, $activateCode) {
-        $link = 'http://www.moreppl.com/User/Activate/do.php?action=activate&DeviceType=1&code=' . $activateCode;
+        $link = 'http://api.moreppl.com/User/Activate/do.php?action=activate&code=' . $activateCode;
         $content = '<html><head></head>
         <body>
-          <p>Hi!<br>
+          <p>Hi there!<br>
             Please click link below to activate you account.<br>
             <a href="' . $link . '">Activate Link</a>
           </p>
