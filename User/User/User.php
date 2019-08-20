@@ -170,11 +170,35 @@ class User extends TeamupBase {
                 // Insert a new signup session
                 db_insert_signup_session($data);
             }
+            // Send activate email
+            $this->sendActivateEmail($username, $code);
             $this->return['success'] = true;
             $this->return['msg'] = '';
             return true;
         }
         return true;
+    }
+
+    private function sendActivateEmail($toEmail, $activateCode) {
+        $link = 'http://www.moreppl.com/User/Activate/do.php?action=activate&DeviceType=1&code=' . $activateCode;
+        $content = '<html><head></head>
+        <body>
+          <p>Hi!<br>
+            Please click link below to activate you account.<br>
+            <a href="' . $link . '">Activate Link</a>
+          </p>
+        </body>
+        </html>';
+        $email = array(
+            'type' => 'email',
+            'status' => 0,
+            'create_time' => now_utc(),
+            'from' => 'info@moreppl.com',
+            'to' => $toEmail,
+            'title' => 'Moreppl Account Activate',
+            'content' => $content
+        );
+        return db_insert_notification($email);
     }
 
     private function processGetUserProfile() {

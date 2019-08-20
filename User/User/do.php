@@ -11,7 +11,7 @@ $LifeCfg = array(
     //'SESSION_CLASS'  => 'JiaSession',
     'DB_TYPE'        => 'Medoo',
     'LOAD_DB'        => array(
-        'User', 'Signup'
+        'User', 'Signup', 'Notification'
     ),
     'LOAD_LIB'       => array(
         'Common/constants.php',
