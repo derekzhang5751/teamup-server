@@ -210,7 +210,7 @@ class User extends TeamupBase {
             if ($user['photo_url']) {
                 $this->return['data']['user']['photo_url'] = $user['photo_url'];
             } else {
-                $this->return['data']['user']['photo_url'] = '/upload/default/head.svg';
+                $this->return['data']['user']['photo_url'] = '/default/head.svg';
             }
         } else {
             $this->return['success'] = false;
@@ -308,7 +308,7 @@ class User extends TeamupBase {
                 $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
                 // Update sensor's picture url
                 $picUrl = str_replace($target_dir, "/", $target_file);
-                $picUrl = '/upload' . $picUrl;
+                // $picUrl = '/upload' . $picUrl;
                 db_update_photo_of_user($userId, $picUrl);
             } else {
                 $this->return['success'] = false;

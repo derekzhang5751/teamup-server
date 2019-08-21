@@ -111,12 +111,13 @@ class Team extends TeamupBase {
                 foreach ($teams as $team) {
                     $brief = [
                         id => $team['id'],
-                        author => $team['author'],
+                        author => $this->getUserNameById( $team['author'] ),
+                        user_id => $team['author'],
                         time_begin => $team['time_begin'],
                         time_end => $team['time_end'],
                         status => $team['status'],
                         title => $team['title'],
-                        photo => '/team/photo.jpeg'
+                        photo => 'http://res.moreppl.com' . $this->getTeamPhotoUrl( $team['id'] )
                     ];
                     array_push($this->return['data']['recommended'], $brief);
                     array_push($this->return['data']['recent'], $brief);
@@ -287,7 +288,7 @@ class Team extends TeamupBase {
                 $this->return['msg'] = "The file " . basename($_FILES["file"]["name"]) . " has been uploaded.";
                 // Update sensor's picture url
                 $picUrl = str_replace($target_dir, "/", $target_file);
-                $picUrl = '/upload' . $picUrl;
+                // $picUrl = '/upload' . $picUrl;
                 db_insert_team_photo($teamId, $picUrl);
             } else {
                 $this->return['success'] = false;
@@ -306,12 +307,13 @@ class Team extends TeamupBase {
         foreach ($teams as $team) {
             $brief = [
                 id => $team['id'],
-                author => $team['author'],
+                author => $this->getUserNameById( $team['author'] ),
+                user_id => $team['author'],
                 time_begin => $team['time_begin'],
                 time_end => $team['time_end'],
                 status => $team['status'],
                 title => $team['title'],
-                photo => '/team/photo.jpeg'
+                photo => 'http://res.moreppl.com' . $this->getTeamPhotoUrl( $team['id'] )
             ];
             array_push($this->return['data']['follows'], $brief);
         }
@@ -328,12 +330,13 @@ class Team extends TeamupBase {
         foreach ($teams as $team) {
             $brief = [
                 id => $team['id'],
-                author => $team['author'],
+                author => $this->getUserNameById( $team['author'] ),
+                user_id => $team['author'],
                 time_begin => $team['time_begin'],
                 time_end => $team['time_end'],
                 status => $team['status'],
                 title => $team['title'],
-                photo => '/team/photo.jpeg'
+                photo => 'http://res.moreppl.com' . $this->getTeamPhotoUrl( $team['id'] )
             ];
             array_push($this->return['data']['myteams'], $brief);
         }
@@ -350,11 +353,29 @@ class Team extends TeamupBase {
                 'team_id' => $item['team_id'],
                 'store_type' => $item['store_type'],
                 'status' => $item['status'],
-                'pic_url' => 'http://teamup.loc' . $item['pic_url']
+                'pic_url' => 'http://res.moreppl.com' . $item['pic_url']
             ];
             array_push($this->return['data']['photos'], $p);
         }
         $this->return['success'] = true;
+    }
+
+    private function getTeamPhotoUrl($teamId) {
+        $photos = db_select_team_photos($teamId);
+        if ($photos && count($photos) > 0) {
+            return $photos[0]['pic_url'];
+        } else {
+            return '/default/head.svg';
+        }
+    }
+
+    private function getUserNameById($userId) {
+        $user = db_get_user_info($userId);
+        if ($user) {
+            return $user['first_name'];
+        } else {
+            return 'Unknown';
+        }
     }
 
 }
