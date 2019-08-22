@@ -200,9 +200,9 @@ class Team extends TeamupBase {
         $this->return['success'] = true;
         $this->return['data']['teamid'] = $teamId;
         if ($users) {
-            $this->return['data']['users'] = $users;
+            $this->return['data']['joinRequestList'] = $users;
         } else {
-            $this->return['data']['users'] = [];
+            $this->return['data']['joinRequestList'] = [];
         }
     }
 
@@ -221,6 +221,12 @@ class Team extends TeamupBase {
             $success = db_update_link_user_team($apply['user_id'], $apply['team_id'], $status, $apply['remark']);
             if ($success) {
                 $this->return['success'] = true;
+                $list = db_select_apply_user_of_team($apply['team_id']);
+                if ($list) {
+                    $this->return['data']['joinRequestList'] = $list;
+                } else {
+                    $this->return['data']['joinRequestList'] = [];
+                }
             } else {
                 $this->return['success'] = false;
                 $this->return['msg'] = $GLOBALS['LANG']['APPLY_ERROR'];
@@ -336,7 +342,8 @@ class Team extends TeamupBase {
                 time_end => $team['time_end'],
                 status => $team['status'],
                 title => $team['title'],
-                photo => 'http://res.moreppl.com' . $this->getTeamPhotoUrl( $team['id'] )
+                photo => 'http://res.moreppl.com' . $this->getTeamPhotoUrl( $team['id'] ),
+                request => $this->getRequestSizeOfTeam( $team['id'] )
             ];
             array_push($this->return['data']['myteams'], $brief);
         }
@@ -376,6 +383,14 @@ class Team extends TeamupBase {
         } else {
             return 'Unknown';
         }
+    }
+
+    private function getRequestSizeOfTeam($teamId) {
+        $condition = [
+            'team_id' => $teamId,
+            'status' => 1
+        ];
+        return db_count_team_link($condition);
     }
 
 }

@@ -170,9 +170,9 @@ function db_select_apply_user_of_team($teamId) {
         ],
         [
             'tu_link_user_team.team_id' => $teamId,
-            'tu_link_user_team.status[>]' => 0,
+            'tu_link_user_team.status' => 1,
             'ORDER' => [
-                "tu_link_user_team.status" => "DESC"
+                "tu_link_user_team.id" => "ASC"
             ]
         ]
     );
@@ -232,4 +232,10 @@ function db_select_team_photos($teamId)
         ]
     );
     return $list;
+}
+
+function db_count_team_link($condition)
+{
+    $count = $GLOBALS['db']->count('tu_link_user_team', $condition);
+    return $count;
 }
